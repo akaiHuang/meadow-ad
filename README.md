@@ -326,7 +326,7 @@ Key finding: Insula activation is **negative** — it signals "too expensive" or
 
 ## Credits
 
-- [Meta Meadow AD](https://ai.meta.com/blog/tribe-v2-brain-predictive-foundation-model/) — Brain encoding foundation model
+- [Meta TRIBE v2](https://ai.meta.com/blog/tribe-v2-brain-predictive-foundation-model/) — Brain encoding foundation model
 - [Apple MLX](https://github.com/ml-explore/mlx) — Machine learning framework for Apple Silicon
 - [Three.js](https://threejs.org/) — 3D web visualization
 - [nilearn](https://nilearn.github.io/) — Brain surface rendering
