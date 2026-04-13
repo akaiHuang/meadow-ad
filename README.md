@@ -81,72 +81,31 @@ Each ad copy is scored by comparing its brain activation pattern to the **averag
 
 Higher score = more distinct brain response = more attention-grabbing.
 
-## Quick Start
-
-### Prerequisites
-
-- Apple Silicon Mac (M1/M2/M3/M4, 16GB+ RAM)
-- Python 3.12+
-
-### Install
-
-```bash
-pip install mlx mlx-lm torch numpy nilearn
-```
-
-### Download Models
-
-```bash
-# Meadow AD checkpoint (0.7 GB)
-huggingface-cli download facebook/tribev2 --local-dir models/tribev2_ckpt
-
-# LLaMA 3.2 3B MLX 4-bit (1.7 GB)
-huggingface-cli download mlx-community/Llama-3.2-3B-Instruct-4bit --local-dir models/llama3.2-3b-4bit
-```
-
-### Analyze Your Ad Copy
-
-```bash
-# Single text
-python scripts/analyze_ads.py --text "Your ad copy here"
-
-# Multiple from JSON file
-echo '["Ad copy 1", "Ad copy 2", "Ad copy 3"]' > my_ads.json
-python scripts/analyze_ads.py --ads my_ads.json --output results/
-```
-
-### Generate 3D Brain Visualization
-
-```bash
-# Generate brain maps + export for web viewer
-python scripts/generate_brain_viewer.py --ads my_ads.json
-
-# Launch viewer
-cd demo && python -m http.server 8899
-```
-
 ## Project Structure
 
 ```
-tribe-v2-ad-brain-analysis/
+meadow-ad/
 ├── README.md
+├── setup.sh                # One-line setup script
+├── requirements.txt
 ├── demo/
 │   ├── index.html          # Three.js 3D brain viewer
-│   └── brain_data.json     # Brain mesh + activation data
+│   ├── brain_data.json     # Brain mesh + activation data (66 slogans)
+│   └── meta-logo.svg
+├── examples/
+│   ├── BENCHMARK.md        # Full benchmark: EN vs ZH comparison
+│   └── benchmark_results.json  # Machine-readable results
 ├── scripts/
 │   ├── analyze_ads.py      # Main analysis pipeline
-│   ├── test_llama_mlx.py   # LLaMA MLX verification
-│   ├── convert_wav2vec_mlx.py    # Wav2Vec-BERT → MLX
-│   ├── convert_vjepa2_mlx.py     # V-JEPA2 → MLX
-│   └── convert_brain_encoder_mlx.py  # Brain Encoder → MLX
-├── models/                 # Downloaded model weights
-│   ├── tribev2_ckpt/
-│   ├── llama3.2-3b-4bit/
-│   ├── w2v-bert-2.0/
-│   └── vjepa2-vitg-mlx/
-└── data/
-    ├── brain_maps.npz      # Computed brain activation maps
-    └── scores.json         # Ranked scores
+│   ├── convert_brain_encoder_mlx.py
+│   ├── convert_vjepa2_mlx.py
+│   └── convert_wav2vec_mlx.py
+├── data/
+│   ├── calibration_result.json   # Weight calibration methodology
+│   └── scoring_method.json       # Region weights + references
+├── docs/
+│   └── demo-screenshot.png
+└── models/                 # Downloaded via setup.sh (not in git)
 ```
 
 ## Brain Region Reference — Advertising Applications
@@ -298,7 +257,49 @@ Key finding: Insula activation is **negative** — it signals "too expensive" or
 | English | ~65% | Native language of fMRI subjects → deeper activation |
 | 中文 | ~33% | Cross-lingual transfer → shallower activation |
 
-**Localization matters.** A proper evaluation of Chinese ad copy requires either: (1) fMRI data from Mandarin-speaking subjects, or (2) ROI-calibrated scoring using real market performance data from the target region.
+**Localization matters.** A proper evaluation of Chinese ad copy requires either: (1) fMRI data from Mandarin-speaking subjects, or (2) calibrated scoring using local award-winning benchmarks.
+
+### Calibration with Award-Winning Slogans
+
+We calibrated the scoring weights using **43 real award-winning slogans** from Taiwan's [廣告流行語金句獎](https://www.brain.com.tw/news/services?category=award) (2016-2024) as ground truth.
+
+**Method:** Ridge Regression — predict "award-winning vs not" from brain region activations → learn which regions matter most for creative effectiveness.
+
+```
+Original Weights (Knutson 2007 — purchase prediction, English speakers):
+  PFC: +0.40 | Insula: -0.20 | Temporal: +0.20 | Parietal: +0.10 | Occipital: +0.10
+
+Calibrated Weights (Taiwan award-winning benchmark, R²=0.66):
+  PFC: -0.13 | Insula: -0.047 | Temporal: -0.481 | Parietal: +0.029 | Occipital: +0.312
+```
+
+**Key insight:** Knutson's weights optimize for purchase behavior. Calibrated weights optimize for creative award-winning quality. **Different objectives = different brain region importance.** The calibration approach can be replicated for any market using local award data or ROI metrics.
+
+### Meadow Score (0-100)
+
+The final composite score for each ad copy:
+
+| Score | Meaning |
+|-------|---------|
+| 90-100 | Exceptional — strong multi-region activation, high predicted engagement |
+| 70-89 | Strong — clear emotional or cognitive trigger |
+| 40-69 | Moderate — some activation but not distinctive |
+| 0-39 | Weak — minimal differentiation from baseline |
+
+See [`examples/BENCHMARK.md`](examples/BENCHMARK.md) for full benchmark results and EN/ZH comparison.
+
+## Quick Start
+
+```bash
+# One-line setup
+pip install -r requirements.txt && ./setup.sh
+
+# Analyze your ad copy
+python scripts/analyze_ads.py --text "Your ad copy here"
+
+# Launch 3D brain viewer
+cd demo && python -m http.server 8899
+```
 
 ## References
 

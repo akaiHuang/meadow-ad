@@ -1,0 +1,488 @@
+{
+  "en_vs_zh_comparison": {
+    "description": "English vs Chinese slogans — same scoring formula, different language processing depth",
+    "note": "English scores higher due to fMRI training data being English-native speakers (see README Language Bias Notice)",
+    "english_top5": [
+      {
+        "text": "Open Happiness",
+        "meadow_score": 66,
+        "category": "4A得獎"
+      },
+      {
+        "text": "The Power of Dreams",
+        "meadow_score": 52,
+        "category": "4A得獎"
+      },
+      {
+        "text": "A Diamond is Forever",
+        "meadow_score": 51,
+        "category": "4A得獎"
+      },
+      {
+        "text": "A Better Life, A Better World",
+        "meadow_score": 51,
+        "category": "4A得獎"
+      },
+      {
+        "text": "Think Small",
+        "meadow_score": 50,
+        "category": "4A得獎"
+      }
+    ],
+    "chinese_top5": [
+      {
+        "text": "每一步 都算樹",
+        "meadow_score": 100,
+        "category": "台灣金句獎"
+      },
+      {
+        "text": "花在刀口 省在街口",
+        "meadow_score": 99,
+        "category": "台灣金句獎"
+      },
+      {
+        "text": "何必長大",
+        "meadow_score": 97,
+        "category": "台灣金句獎"
+      },
+      {
+        "text": "今天來聚吧",
+        "meadow_score": 96,
+        "category": "台灣金句獎"
+      },
+      {
+        "text": "這樣懂了爸",
+        "meadow_score": 95,
+        "category": "台灣金句獎"
+      }
+    ],
+    "english_avg": 40,
+    "chinese_avg": 82
+  },
+  "scoring_formula": {
+    "weights": {
+      "PFC": 0.4,
+      "Insula": -0.2,
+      "Temporal": 0.2,
+      "Parietal": 0.1,
+      "Occipital": 0.1
+    },
+    "calibrated_weights": {
+      "PFC": -0.13,
+      "Insula": -0.047,
+      "Temporal": -0.481,
+      "Parietal": 0.029,
+      "Occipital": 0.312
+    },
+    "calibration_method": "Ridge Regression on 43 Taiwan award-winning slogans (R²=0.66)",
+    "calibration_source": "Brain.com.tw 廣告流行語金句獎 2016-2024"
+  },
+  "meadow_score_formula": {
+    "description": "Meadow Score: 0-100 composite index for ad effectiveness prediction",
+    "formula": "Meadow Score = normalize(w_PFC × PFC + w_Insula × Insula + w_Temporal × Temporal + w_Parietal × Parietal + w_Occipital × Occipital)",
+    "interpretation": {
+      "90-100": "Exceptional — strong multi-region activation, high predicted engagement",
+      "70-89": "Strong — clear emotional or cognitive trigger",
+      "40-69": "Moderate — some activation but not distinctive",
+      "0-39": "Weak — minimal differentiation from baseline"
+    }
+  },
+  "full_ranking": [
+    {
+      "rank": 1,
+      "text": "每一步 都算樹",
+      "meadow_score": 100,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 2,
+      "text": "花在刀口 省在街口",
+      "meadow_score": 99,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 3,
+      "text": "何必長大",
+      "meadow_score": 97,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 4,
+      "text": "今天來聚吧",
+      "meadow_score": 96,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 5,
+      "text": "這樣懂了爸",
+      "meadow_score": 95,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 6,
+      "text": "每一天，都要來點陽光",
+      "meadow_score": 95,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 7,
+      "text": "人沒來，至少也要喜年來",
+      "meadow_score": 93,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 8,
+      "text": "低頭，才有賺頭",
+      "meadow_score": 89,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 9,
+      "text": "世界越快 心 則慢",
+      "meadow_score": 89,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 10,
+      "text": "省錢就像白T牛仔褲，永不退流行",
+      "meadow_score": 88,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 11,
+      "text": "為了下一代，我們決定拿起這一袋。",
+      "meadow_score": 88,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 12,
+      "text": "後來的我們，都更好了",
+      "meadow_score": 87,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 13,
+      "text": "好喝到有春",
+      "meadow_score": 87,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 14,
+      "text": "一年一Do，平安普渡",
+      "meadow_score": 87,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 15,
+      "text": "好東西要跟好朋友分享",
+      "meadow_score": 85,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 16,
+      "text": "解放玩心 禁止小心",
+      "meadow_score": 84,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 17,
+      "text": "強力脫睏",
+      "meadow_score": 83,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 18,
+      "text": "有伴用力閃，沒伴擋光害",
+      "meadow_score": 83,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 19,
+      "text": "年輕人不怕菜，就怕不吃菜！",
+      "meadow_score": 83,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 20,
+      "text": "把認真 做到成真",
+      "meadow_score": 82,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 21,
+      "text": "今天下單，明天脫單",
+      "meadow_score": 82,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 22,
+      "text": "小兒麻痺，其實是大人麻痺",
+      "meadow_score": 82,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 23,
+      "text": "我不是機器人，我是人",
+      "meadow_score": 81,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 24,
+      "text": "做喜歡的事 回心中的甘",
+      "meadow_score": 81,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 25,
+      "text": "富不過三代，但來全聯可以一袋一袋省下去",
+      "meadow_score": 81,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 26,
+      "text": "為愛煮 更愛煮",
+      "meadow_score": 80,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 27,
+      "text": "難以抗劇",
+      "meadow_score": 80,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 28,
+      "text": "敢傻就是我的本事",
+      "meadow_score": 79,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 29,
+      "text": "愛 不著痕跡",
+      "meadow_score": 79,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 30,
+      "text": "先誠實，再成交",
+      "meadow_score": 79,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 31,
+      "text": "先誠實 再成交",
+      "meadow_score": 79,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 32,
+      "text": "給人幸福 就是幸福",
+      "meadow_score": 79,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 33,
+      "text": "普渡要速渡",
+      "meadow_score": 78,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 34,
+      "text": "不在乎天長地久，只在乎曾經擁有",
+      "meadow_score": 77,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 35,
+      "text": "值得尊敬的不是你做什麼，而是把什麼做到值得尊敬",
+      "meadow_score": 77,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 36,
+      "text": "付出不是犧牲，是我想過的人生",
+      "meadow_score": 77,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 37,
+      "text": "大旅遊 不必大理由",
+      "meadow_score": 77,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 38,
+      "text": "鑽石恆久遠，一顆永流傳",
+      "meadow_score": 76,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 39,
+      "text": "挺~會玩的！",
+      "meadow_score": 76,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 40,
+      "text": "生命就該浪費在美好的事物上",
+      "meadow_score": 75,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 41,
+      "text": "專注眼前，有勁 無退。",
+      "meadow_score": 75,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 42,
+      "text": "人生的旅程，未玩待續！",
+      "meadow_score": 75,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 43,
+      "text": "和地球「練」愛吧",
+      "meadow_score": 73,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 44,
+      "text": "今天你值得一個驚嘆號！",
+      "meadow_score": 73,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 45,
+      "text": "沒有了偏見，留給他們的就是無限！",
+      "meadow_score": 73,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 46,
+      "text": "猶豫 是對自己太客氣",
+      "meadow_score": 70,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 47,
+      "text": "拿金牌了啦!",
+      "meadow_score": 69,
+      "category": "台灣金句獎"
+    },
+    {
+      "rank": 48,
+      "text": "Open Happiness",
+      "meadow_score": 66,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 49,
+      "text": "The Power of Dreams",
+      "meadow_score": 52,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 50,
+      "text": "A Diamond is Forever",
+      "meadow_score": 51,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 51,
+      "text": "A Better Life, A Better World",
+      "meadow_score": 51,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 52,
+      "text": "Think Small",
+      "meadow_score": 50,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 53,
+      "text": "Got Milk?",
+      "meadow_score": 46,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 54,
+      "text": "Red Bull Gives You Wings",
+      "meadow_score": 45,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 55,
+      "text": "It's a Sony",
+      "meadow_score": 40,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 56,
+      "text": "Melts in Your Mouth, Not in Your Hands",
+      "meadow_score": 40,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 57,
+      "text": "Think Different",
+      "meadow_score": 39,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 58,
+      "text": "We Try Harder",
+      "meadow_score": 39,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 59,
+      "text": "Just Do It",
+      "meadow_score": 38,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 60,
+      "text": "Finger Lickin' Good",
+      "meadow_score": 38,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 61,
+      "text": "The Ultimate Driving Machine",
+      "meadow_score": 37,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 62,
+      "text": "Because You're Worth It",
+      "meadow_score": 33,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 63,
+      "text": "Taste the Rainbow",
+      "meadow_score": 32,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 64,
+      "text": "Where's the Beef?",
+      "meadow_score": 31,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 65,
+      "text": "There are some things money can't buy. For everything else, there's Mastercard.",
+      "meadow_score": 25,
+      "category": "4A得獎"
+    },
+    {
+      "rank": 66,
+      "text": "Trust me, you can make it!",
+      "meadow_score": 0,
+      "category": "4A得獎"
+    }
+  ]
+}
