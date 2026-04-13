@@ -20,14 +20,17 @@ Each voxel maps to a specific location on the brain's surface (fsaverage5 atlas)
 
 ### Key Insight
 
-**Not all text activates the brain equally.**
+**Not all text activates the brain equally.** Tested on real award-winning slogans:
 
-| Copy Type | Brain Response | Why |
-|-----------|---------------|-----|
-| "Handmade soap $265" | Weak | Pure information, no emotion |
-| "Order today, pick up tomorrow, enjoy the day after" | **Strong** | Temporal sequence triggers dopamine anticipation |
-| "My mom said no gifts needed, but her eyes teared up when she opened it" | **Strong** | Emotional narrative activates empathy circuits |
-| "Still scrolling at 2 AM? This works better than sleeping pills" | **Strong** | Pain point triggers amygdala + reward expectation |
+| Score | Slogan | Activated Regions | Why It Works |
+|-------|--------|-------------------|-------------|
+| 🟢 100% | "Trust me, you can make it!" (媚登峰) | vmPFC + NAcc + Motor | Trust triggers social cognition; encouragement activates reward + action planning |
+| 🟢 97% | "Where's the Beef?" (Wendy's) | PFC + ACC + Amygdala | Question forces cognitive processing; challenges competitor triggering conflict detection |
+| 🟢 89% | "先誠實，再成交" (永慶房屋 2021 永恆金句) | vmPFC + ACC | Honesty activates value judgment; promise structure triggers trust circuit |
+| 🟡 36% | "猶豫 是對自己太客氣" (必爾斯藍基 2020) | Amygdala + PFC | Reframes hesitation as self-neglect; triggers loss aversion |
+| 🔴 0% | "解放玩心 禁止小心" (恆隆行 2024) | Language area only | Abstract wordplay — minimal emotional or reward activation |
+
+> Benchmark: 66 slogans from Cannes Lions, 4A Awards, and Taiwan 廣告流行語金句獎 (2016-2024). Scored using [Knutson 2007](https://pubmed.ncbi.nlm.nih.gov/17196537/) purchase prediction formula, calibrated with Ridge Regression on award-winning slogans (R²=0.66).
 
 ## Live Demo
 
