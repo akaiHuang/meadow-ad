@@ -1,0 +1,21 @@
+{
+  "method": "Ridge Regression on award-winning slogans as ground truth",
+  "r_squared": 0.6606,
+  "old_weights_knutson": {
+    "PFC": 0.4,
+    "Insula": -0.2,
+    "Temporal": 0.2,
+    "Parietal": 0.1,
+    "Occipital": 0.1
+  },
+  "calibrated_weights": {
+    "PFC": -0.13,
+    "Insula": -0.047,
+    "Temporal": -0.481,
+    "Parietal": 0.029,
+    "Occipital": 0.312
+  },
+  "n_award_slogans": 43,
+  "n_total": 66,
+  "source": "動腦 Brain.com.tw 廣告流行語金句獎 2016-2024"
+}

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>Meadow AD — Ad Copy Brain Activation Analysis</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #08080c; color: #eee; font-family: -apple-system, sans-serif; overflow: hidden; }
+#canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; }
+
+/* 中央文案卡片 */
+#card {
+    position: fixed; top: 28%; left: 50%; transform: translateX(-50%);
+    z-index: 10; text-align: center; width: 680px; max-width: 90vw;
+    pointer-events: none;
+}
+#score {
+    font-size: 72px; font-weight: 800; font-family: monospace;
+    color: #ffffff;
+    line-height: 1;
+}
+#score-label { font-size: 13px; color: #888; margin-bottom: 12px; }
+#ad-text {
+    font-size: 26px; font-weight: 600; line-height: 1.5;
+    margin: 8px 0 0; min-height: auto;
+    text-shadow: 0 0 40px rgba(0,0,0,0.8);
+}
+#tag {
+    display: inline-block; font-size: 11px; padding: 3px 10px;
+    border-radius: 20px; margin-bottom: 16px;
+}
+.tag-existing { background: rgba(100,100,100,0.4); color: #aaa; }
+.tag-new { background: rgba(0,200,100,0.2); color: #5d5; border: 1px solid rgba(0,200,100,0.3); }
+#analysis-box {
+    background: rgba(10,10,20,0.7); border-radius: 12px; padding: 14px 20px;
+    backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08);
+    text-align: left; font-size: 13px; line-height: 1.7;
+}
+#analysis-box .label { color: #666; font-size: 11px; }
+#analysis-box .region { color: #fa8; }
+#analysis-box .mechanism { color: #8da; }
+
+/* 左右箭頭 */
+.nav-btn {
+    position: fixed; top: 50%; z-index: 20; transform: translateY(-50%);
+    width: 56px; height: 56px; border-radius: 50%;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15);
+    color: #aaa; font-size: 24px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; backdrop-filter: blur(4px);
+}
+.nav-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+#prev { left: 24px; }
+#next { right: 24px; }
+
+/* 頂部標題 */
+#header {
+    position: fixed; top: 50px; left: 50%; transform: translateX(-50%);
+    z-index: 10; text-align: center;
+}
+#header h2 { font-size: 11px; color: #555; letter-spacing: 2px; text-transform: uppercase; }
+
+/* 熱力圖（分析框外面下方） */
+#heatmap-wrap {
+    margin-top: 10px; width: 50%; margin-left: auto; margin-right: auto;
+    pointer-events: none;
+}
+#heatmap-canvas {
+    width: 100%; height: 8px; border-radius: 4px;
+    display: block;
+}
+#heatmap-labels {
+    display: flex; justify-content: space-between;
+    font-size: 8px; color: #999; margin-top: 3px;
+}
+
+#loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #555; z-index: 100; }
+
+/* 鍵盤提示 */
+#hint {
+    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
+    z-index: 10; font-size: 10px; color: #444;
+}
+</style>
+</head>
+<body>
+<div id="loading">Loading...</div>
+<canvas id="canvas"></canvas>
+
+<div id="header">
+    <h1 style="font-size:25px;color:#999;letter-spacing:6px;margin-bottom:6px">MEADOW AD</h1>
+    <h2 style="font-size:16px;letter-spacing:2px">AD COPY BRAIN ACTIVATION ANALYSIS</h2>
+</div>
+
+<div id="card">
+    <div id="score">100</div>
+    <div id="score-label">Brain Activation Score</div>
+    <div id="tag" class="tag-new">新文案</div>
+    <div id="ad-text">Loading...</div>
+    <div id="counter" style="font-size:20px;color:#666;margin:8px 0 12px"></div>
+    <div id="analysis-box">
+        <div><span class="label">Activated Regions: </span><span class="region" id="a-region">—</span></div>
+        <div><span class="label">Mechanism: </span><span class="mechanism" id="a-mechanism">—</span></div>
+    </div>
+    <div id="heatmap-wrap">
+        <canvas id="heatmap-canvas"></canvas>
+        <div id="heatmap-labels"><span>Suppressed</span><span>Neutral</span><span>Activated</span></div>
+    </div>
+    <div id="formula" style="margin-top:8px;font-size:8px;color:#aaa;font-family:monospace;text-align:center">
+        0.40×PFC + (−0.20)×Insula + 0.20×Temporal + 0.10×Parietal + 0.10×Occipital
+    </div>
+    <div style="margin-top:6px;font-size:9px;color:#888;text-align:center">
+        ← → Switch copy · Drag to rotate · Scroll to zoom
+    </div>
+</div>
+
+<button class="nav-btn" id="prev" onclick="navigate(-1)">←</button>
+<button class="nav-btn" id="next" onclick="navigate(1)">→</button>
+
+
+<div id="footer" style="position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:10;font-size:8px;color:#999;text-align:center;line-height:1.6">
+    d'Ascoli et al. 2026, <i>arXiv</i> · Knutson et al. 2007, <i>Neuron</i> · Falk et al. 2012, <i>Psych Sci</i> · Venkatraman et al. 2015, <i>JMR</i> · Berns &amp; Moore 2012, <i>JCP</i><br>
+    fMRI: CNeuroMod · BoldMoments (MIT) · HCP (WashU, 7T) · Narratives (Princeton) · 720 subjects, 1,117h
+</div>
+<div style="position:fixed;bottom:20px;right:20px;z-index:10;display:flex;align-items:center;gap:6px">
+    <span style="font-size:8px;color:#444">Powered by</span>
+    <img src="meta-logo.svg" alt="Meta" style="height:14px;opacity:0.4">
+</div>
+
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+let scene, camera, renderer, controls, composer, brainMesh, pointCloud;
+let brainData = null;
+let allSortedItems = [];
+let sortedItems = [];
+let currentIdx = 0;
+let currentLang = 'all'; // 'all', 'en', 'zh', 'ja'
+
+function isChineseText(text) {
+    return /[\u4e00-\u9fff]/.test(text) && !/[\u3040-\u30ff]/.test(text);
+}
+function isJapaneseText(text) {
+    return /[\u3040-\u30ff\u31f0-\u31ff]/.test(text);
+}
+
+function filterByLang(lang) {
+    currentLang = lang;
+    if (lang === 'all') {
+        sortedItems = [...allSortedItems];
+    } else if (lang === 'en') {
+        sortedItems = allSortedItems.filter(item => !isChineseText(item.label) && !isJapaneseText(item.label));
+    } else if (lang === 'ja') {
+        sortedItems = allSortedItems.filter(item => isJapaneseText(item.label));
+    } else {
+        sortedItems = allSortedItems.filter(item => isChineseText(item.label));
+    }
+    currentIdx = 0;
+    if (sortedItems.length > 0) showItem(0);
+    // Update button styles
+    document.querySelectorAll('.lang-btn').forEach(b => b.style.opacity = '0.4');
+    document.getElementById('lang-' + lang).style.opacity = '1';
+}
+
+const analysis = {
+    "今天下單，明天超商取貨，後天就能享受": { r: "Nucleus Accumbens + PFC", m: "Temporal narrative triggers dopamine circuit for instant gratification" },
+    "加班到深夜回家，打開浴室那一刻，世界終於安靜了": { r: "PFC + Insula + Limbic System", m: "Situational empathy activates self-projection; sensory description triggers somatic simulation" },
+    "媽媽說不用買禮物，但收到的時候眼眶紅了": { r: "Mirror Neurons + ACC", m: "Emotional story triggers empathy circuit and emotion processing center" },
+    "又在滑手機到凌晨？這個比安眠藥更好的方法": { r: "Amygdala + Reward Circuit", m: "Pain point triggers anxiety; solution triggers reward anticipation" },
+    "閨蜜以為我買了Aesop，其實只花了她的十分之一": { r: "TPJ + Nucleus Accumbens", m: "Social comparison triggers Theory of Mind; price surprise triggers dopamine" },
+    "她打開禮物的那一刻笑了——這就是我想要的反應": { r: "Mirror Neurons + OFC", m: "Others' emotions activate mirror system; goal-directed reward circuit" },
+    "蜜桃＋白茶＋一點點海鹽——聞到的人都問這是什麼": { r: "Olfactory Cortex + Piriform", m: "Scent description triggers olfactory simulation; social scene triggers social cognition" },
+    "專櫃香氛要3000元，這個只要265元卻更天然": { r: "PFC + Insula", m: "Numerical contrast triggers rational comparison and quality judgment" },
+    "像走進清晨的森林，又像躺在薰衣草田裡": { r: "Visual Cortex + Hippocampus", m: "Vivid metaphor triggers mental imagery and spatial memory" },
+    "第一次洗完不想沖掉，因為香氣太療癒了": { r: "Insula + Reward Circuit", m: "Somatic description triggers body simulation and positive emotion" },
+    "Google評價4.9星｜2萬人回購的手作香氛": { r: "Temporoparietal Junction", m: "Social proof triggers conformity effect" },
+    "壓力大到睡不著？15分鐘香氛儀式，今晚好好休息": { r: "Amygdala + PFC", m: "Pain point triggers anxiety; specific time lowers action barrier" },
+    "賣到缺貨3次的香氛塊，補貨了但只剩最後一批": { r: "Amygdala", m: "Scarcity triggers loss aversion" },
+    "每天被手機綁架？用一塊香氛塊，找回真實的自己": { r: "PFC + ACC", m: "Self-reflection triggers identity recognition" },
+    "飯店SPA一次2000，這塊265元讓你每天在家SPA": { r: "PFC + Nucleus Accumbens", m: "Price anchoring effect and domesticated luxury anticipation" },
+    "台灣手作香氛塊｜NT$265起": { r: "Language Area", m: "Pure information — basic language processing only, no emotional activation" },
+    "16款獨特香氣｜質感送禮首選": { r: "PFC", m: "Choice evaluation and decision support" },
+    "天然潔膚塊｜浴室裡的充電儀式": { r: "Insula + DMN", m: "\"Ritual\" triggers concrete visualization" },
+    "BUBBLILUX奢華香氛｜SPA級享受": { r: "Reward Circuit + Sensory Cortex", m: "Luxury association triggers sensory anticipation" },
+    "送禮不踩雷｜香氛禮盒免費包裝": { r: "Amygdala", m: "\"Won't go wrong\" reduces fear; \"Free\" triggers reward" },
+    "ad1.png 廣告圖片": { r: "Visual Cortex V1/V2 + Fusiform (Object Recognition)", m: "Image directly activates primary visual cortex; color and composition trigger high-level object recognition" },
+    "ad2.mov 廣告影片": { r: "Visual Cortex + Temporal MT/V5 (Motion) + PFC", m: "Dynamic imagery activates motion perception; scene cuts trigger attention allocation and narrative comprehension" },
+    "ad2 廣告音頻": { r: "Auditory Cortex + STG + Broca's Area", m: "Audio directly activates auditory processing; speech triggers language comprehension; music triggers emotional center" },
+    // 4A Award-Winning Slogans
+    "Just Do It": { r: "PFC (Motor intention) + ACC", m: "Imperative command activates action planning circuit; extreme brevity forces deep semantic processing" },
+    "Think Different": { r: "DLPFC + DMN (Self-reflection)", m: "Cognitive reframing activates executive control; identity appeal triggers default mode network" },
+    "A Diamond is Forever": { r: "Hippocampus + vmPFC", m: "Permanence concept triggers long-term memory encoding; emotional value judgment in vmPFC" },
+    "Because You're Worth It": { r: "vmPFC (Self-worth) + NAcc", m: "Direct self-relevance statement activates vmPFC; self-reward anticipation triggers NAcc" },
+    "There are some things money can't buy. For everything else, there's Mastercard.": { r: "PFC + Insula (↓) + NAcc", m: "Reframes spending as emotional value; reduces price pain (Insula↓); triggers reward anticipation" },
+    "Think Small": { r: "DLPFC + ACC (Conflict)", m: "Paradoxical command creates cognitive conflict in ACC; forces deep processing in DLPFC" },
+    "Open Happiness": { r: "NAcc + OFC", m: "Direct happiness association triggers reward circuit; action verb activates motor planning" },
+    "Red Bull Gives You Wings": { r: "Motor Cortex + DMN (Imagery)", m: "Metaphorical flight triggers embodied simulation; imagery activates default mode network" },
+    "The Ultimate Driving Machine": { r: "Motor Cortex + NAcc + Sensory", m: "Driving imagery activates motor simulation; 'ultimate' triggers peak reward anticipation" },
+    "Melts in Your Mouth, Not in Your Hands": { r: "Insula (Interoception) + Somatosensory", m: "Tactile/taste description activates body simulation; sensory contrast maintains attention" },
+    "We Try Harder": { r: "ACC + Mirror Neurons", m: "Underdog narrative triggers empathy; effort recognition activates anterior cingulate" },
+    "Finger Lickin' Good": { r: "Insula (Gustatory) + Motor Cortex", m: "Taste imagery activates gustatory insula; action description triggers motor simulation" },
+    "Taste the Rainbow": { r: "Visual Cortex V4 + Gustatory Insula", m: "Synesthetic command bridges visual (color) and taste (gustatory) processing" },
+    "Got Milk?": { r: "PFC + Amygdala (Loss)", m: "Question forces cognitive processing; implies scarcity triggering loss aversion" },
+    "Where's the Beef?": { r: "PFC + ACC (Conflict) + Amygdala", m: "Question demands answer; challenges competitor triggering conflict detection and skepticism" },
+    "Trust me, you can make it!": { r: "vmPFC (Trust) + NAcc + Motor Cortex", m: "Trust activates vmPFC social cognition; encouragement triggers reward + action planning" },
+    "鑽石恆久遠，一顆永流傳": { r: "Hippocampus + vmPFC", m: "Permanence triggers memory encoding; cultural value judgment in vmPFC" },
+    "不在乎天長地久，只在乎曾經擁有": { r: "vmPFC + Temporal (Emotion)", m: "Philosophical reframe triggers self-reflection; emotional narrative activates temporal lobe" },
+    "好東西要跟好朋友分享": { r: "TPJ (Social) + NAcc", m: "Social sharing triggers Theory of Mind; generosity activates reward circuit" },
+    "生命就該浪費在美好的事物上": { r: "vmPFC + DMN", m: "Philosophical paradox triggers deep self-reflection in default mode network" },
+    // Japanese
+    "何も足さない。何も引かない。": { r: "DLPFC + ACC", m: "Minimalist paradox triggers deep cognitive processing; purity concept activates value judgment" },
+    "今日よりいい明日を。": { r: "PFC + NAcc", m: "Future optimism triggers reward anticipation; comparison activates progress evaluation" },
+    "一瞬も 一生も 美しく": { r: "Temporal (Emotion) + vmPFC", m: "Time contrast triggers philosophical reflection; beauty concept activates aesthetic processing" },
+    "そうだ 京都、行こう。": { r: "Hippocampus + Motor Cortex", m: "Place name triggers spatial memory; imperative activates action planning" },
+    "お口の恋人": { r: "Gustatory Insula + vmPFC (Emotion)", m: "Oral sensation triggers taste simulation; romantic metaphor activates emotional processing" },
+    "おいしいは、うれしい。": { r: "Gustatory Insula + NAcc", m: "Taste-happiness link triggers reward circuit; simplicity forces deep semantic binding" },
+    "服を変え、常識を変え、世界を変えていく": { r: "PFC + Motor Cortex", m: "Escalating structure (clothes→norms→world) triggers expanding scope processing" },
+    "It's a Sony": { r: "PFC (Brand recognition) + Auditory", m: "Brand identity statement triggers recognition memory; simplicity maximizes recall" },
+    "The Power of Dreams": { r: "DMN + NAcc", m: "Abstract aspiration activates default mode imagination; power triggers motivation circuit" },
+    "一秒を刻む。未来を拓く。": { r: "PFC + Temporal", m: "Precision-to-vastness contrast triggers temporal processing expansion" },
+    "これでいい。": { r: "vmPFC + ACC (Conflict resolution)", m: "Acceptance statement resolves decision conflict; extreme brevity demands deep interpretation" },
+    "シェアハピ": { r: "TPJ (Social) + NAcc", m: "Sharing triggers social cognition; coined word (share+happy) forces novel processing" },
+    "うまい！を明日へ。": { r: "Gustatory Insula + PFC", m: "Taste exclamation triggers sensory processing; future direction activates planning" },
+    "A Better Life, A Better World": { r: "vmPFC + DMN", m: "Progressive improvement triggers value assessment; global scope activates broad thinking" },
+    "あなたとクルマの物語。": { r: "DMN + Mirror Neurons", m: "Personal narrative ('your story') triggers self-projection and identity processing" },
+    // Taiwan Classic
+    "世界越快，心則慢": { r: "ACC + DMN", m: "Paradox triggers conflict detection; mindfulness concept activates default mode introspection" },
+    "認真的女人最美麗": { r: "vmPFC + Mirror Neurons", m: "Identity affirmation activates self-concept; gender-specific appeal triggers social cognition" },
+    "你累了嗎": { r: "PFC + Amygdala", m: "Direct question forces self-assessment; fatigue recognition triggers empathy circuit" },
+    "乎乾啦": { r: "Motor Cortex + NAcc", m: "Action command triggers motor planning; drinking ritual triggers reward anticipation" },
+    "只要我喜歡，有什麼不可以": { r: "vmPFC + NAcc (Liberation)", m: "Self-permission statement activates reward; rebellion triggers dopamine release" },
+    "我就是我，是顏色不一樣的煙火": { r: "vmPFC + DMN", m: "Identity declaration activates self-concept; poetic metaphor triggers imagery network" },
+    "再忙，也要跟你喝杯咖啡": { r: "TPJ (Social) + NAcc", m: "Social bonding triggers Theory of Mind; shared ritual triggers reward anticipation" },
+    "有些事現在不做，一輩子都不會做了": { r: "Amygdala (Urgency) + PFC", m: "Mortality salience triggers fear circuit; action imperative activates decision-making" },
+    "讓我們用最好的心情，做最好的自己": { r: "vmPFC + ACC", m: "Aspirational self-concept activates vmPFC; collective 'we' triggers social identity" },
+    "我把青春留在這裡了": { r: "Hippocampus + Temporal (Emotion)", m: "Nostalgia triggers memory retrieval; loss concept activates emotional processing" },
+    "三餐老是在外，人人叫我老外": { r: "Broca's (Wordplay) + NAcc", m: "Rhyming wordplay triggers language processing; humor activates reward circuit" },
+    "足感心耶": { r: "Temporal (Emotion) + TPJ", m: "Gratitude expression triggers emotional processing; Taiwanese dialect triggers cultural identity" },
+    "你是我的巧克力": { r: "Gustatory Insula + vmPFC (Emotion)", m: "Sweet taste metaphor triggers sensory simulation; romantic framing activates attachment circuit" },
+    "幸福，就是彼此相愛的樣子": { r: "vmPFC + Mirror Neurons", m: "Happiness definition triggers value judgment; mutual love concept activates empathy" },
+    "生活，可以更美好": { r: "vmPFC + NAcc", m: "Improvement promise triggers reward anticipation; simplicity maximizes accessibility" },
+    "Just for you，只為你": { r: "vmPFC (Self-relevance) + NAcc", m: "Direct personal address activates self-referential processing; exclusivity triggers reward" },
+    "一家人的幸福，從一碗飯開始": { r: "Hippocampus + Temporal + Insula", m: "Family triggers attachment memory; rice bowl activates cultural-sensory associations" },
+    "科技始終來自於人性": { r: "DLPFC + vmPFC", m: "Technology-humanity contrast triggers rational processing; humanistic value activates vmPFC" },
+    "歡樂的時光，從麥當勞開始": { r: "NAcc + Hippocampus", m: "Joy association triggers reward; brand-experience link activates memory encoding" },
+    "我是一個被咖啡耽誤的上班族": { r: "Broca's (Humor) + vmPFC", m: "Self-deprecating humor triggers language processing; identity joke activates self-concept" },
+};
+
+async function init() {
+    const resp = await fetch('brain_data.json');
+    brainData = await resp.json();
+    document.getElementById('loading').style.display = 'none';
+
+    // Sort by score
+    const scores = brainData.scores || [];
+    allSortedItems = brainData.labels.map((label, i) => ({
+        label, idx: i,
+        scoreObj: scores.find(s => s.text === label) || { score_pct: 50, is_existing: false }
+    })).sort((a, b) => b.scoreObj.score_pct - a.scoreObj.score_pct);
+    sortedItems = [...allSortedItems];
+
+    // Three.js
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 1000);
+    camera.position.set(0, 30, 260);  // ~70vw brain width
+    camera.lookAt(0, 0, 0);
+
+    const canvas = document.getElementById('canvas');
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+    controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.target.set(0, 0, 0);
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.5;
+
+    scene.add(new THREE.AmbientLight(0x445566, 0.5));
+    const d1 = new THREE.DirectionalLight(0xbbbbcc, 0.8); d1.position.set(50,50,50); scene.add(d1);
+    const d2 = new THREE.DirectionalLight(0x8899aa, 0.4); d2.position.set(-40,20,-30); scene.add(d2);
+
+    // Brain mesh
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(brainData.vertices.flat()), 3));
+    g.setAttribute('color', new THREE.BufferAttribute(new Float32Array(brainData.vertices.length*3), 3));
+    g.setIndex(new THREE.BufferAttribute(new Uint32Array(brainData.faces.flat()), 1));
+    g.computeVertexNormals();
+    g.computeBoundingBox();
+    g.center();  // 把幾何中心移到原點
+    brainMesh = new THREE.Mesh(g, new THREE.MeshPhongMaterial({ vertexColors:true, transparent:true, opacity:0.82, shininess:15, side:THREE.DoubleSide }));
+    brainMesh.rotation.x = -Math.PI/2;
+    scene.add(brainMesh);
+
+    // Points
+    const pg = new THREE.BufferGeometry();
+    pg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(brainData.vertices.flat()), 3));
+    pg.setAttribute('color', new THREE.BufferAttribute(new Float32Array(brainData.vertices.length*3), 3));
+    pg.center();
+    pointCloud = new THREE.Points(pg, new THREE.PointsMaterial({ vertexColors:true, transparent:true, opacity:0.3, size:0.4, blending:THREE.AdditiveBlending, depthWrite:false, sizeAttenuation:true }));
+    pointCloud.rotation.x = -Math.PI/2;
+    scene.add(pointCloud);
+
+    // Bloom
+    composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight), 0.6, 0.4, 0.85);
+    bloom.threshold = 0.3;
+    composer.addPass(bloom);
+
+    showItem(0);
+
+    addEventListener('resize', () => {
+        camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth,innerHeight); composer.setSize(innerWidth,innerHeight);
+    });
+    addEventListener('keydown', e => {
+        if (e.key==='ArrowRight'||e.key==='ArrowDown') navigate(1);
+        if (e.key==='ArrowLeft'||e.key==='ArrowUp') navigate(-1);
+    });
+    animate();
+}
+
+function showItem(idx) {
+    currentIdx = idx;
+    const item = sortedItems[idx];
+    const label = item.label;
+    const sc = item.scoreObj;
+
+    // Update UI
+    document.getElementById('score').textContent = sc.score_pct;
+    document.getElementById('ad-text').textContent = label;
+    document.getElementById('counter').textContent = `${idx+1} / ${sortedItems.length}`;
+
+    const tag = document.getElementById('tag');
+    const cat = ((brainData.scores || []).find(s => s.text === label) || {}).category || '';
+    const isMedia = cat === '素材';
+    tag.className = sc.is_existing ? 'tag-existing' : 'tag-new';
+    const isAward = cat === '4A得獎';
+    const isTwAward = cat === '台灣金句獎';
+    tag.textContent = sc.is_existing ? 'Existing' : isMedia ? '📷 Media' : isTwAward ? '🏆 台灣金句獎' : isAward ? '🏆 4A Award' : '✦ AI Generated';
+
+    // Dynamic analysis from brain data
+    const info = analysis[label] || generateAnalysis(label);
+    document.getElementById('a-region').textContent = info.r;
+    document.getElementById('a-mechanism').textContent = info.m;
+
+    // Update brain colors
+    const act = brainData.activations[label];
+    if (!act) return;
+    const abs = act.map(Math.abs);
+    const sorted = [...abs].sort((a,b)=>a-b);
+    const thresh = sorted[Math.floor(sorted.length*0.55)];
+    const ma = Math.max(...abs)||1;
+
+    const mc = brainMesh.geometry.getAttribute('color');
+    const pc = pointCloud.geometry.getAttribute('color');
+    for (let i=0; i<act.length; i++) {
+        const v = act[i]/ma;
+        const t = thresh/ma;
+        let r,g,b;
+        if (Math.abs(v)<t) { r=0.2; g=0.2; b=0.24; }
+        else if (v>0) { const s=Math.min(v/(1-t+0.01),1); r=0.45+0.55*s; g=0.3+0.3*(1-s); b=0.06; }
+        else { const s=Math.min(-v/(1-t+0.01),1); r=0.06; g=0.2+0.25*(1-s); b=0.45+0.55*s; }
+        mc.setXYZ(i,r,g,b);
+        pc.setXYZ(i, r*1.4, g*1.4, b*1.4);
+    }
+    mc.needsUpdate=true;
+    pc.needsUpdate=true;
+
+    // Heatmap bar
+    drawHeatmap(act, ma);
+}
+
+function drawHeatmap(act, maxAbs) {
+    const canvas = document.getElementById('heatmap-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = 2;
+    canvas.width = canvas.offsetWidth * dpr;
+    canvas.height = canvas.offsetHeight * dpr;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const sorted = [...act].sort((a, b) => a - b);
+    const w = canvas.width;
+    const h = canvas.height;
+    const r = h / 2;
+
+    // Draw with anti-aliased rounded rect clip
+    ctx.beginPath();
+    ctx.roundRect(0, 0, w, h, r);
+    ctx.clip();
+
+    // Continuous color mapping: blue → gray → orange with smooth interpolation
+    function lerpColor(v) {
+        // v: -1 (blue) → 0 (gray) → +1 (orange)
+        // Use smooth hermite interpolation for seamless gradients
+        if (v >= 0) {
+            const t = Math.min(v, 1);
+            const s = t * t * (3 - 2 * t); // smoothstep
+            return [
+                Math.floor(55 + 200 * s),     // R: gray→orange
+                Math.floor(55 + 70 * s * (1 - s * 0.5)), // G: gray→warm
+                Math.floor(65 - 50 * s),       // B: gray→dark
+            ];
+        } else {
+            const t = Math.min(-v, 1);
+            const s = t * t * (3 - 2 * t);
+            return [
+                Math.floor(55 - 40 * s),       // R: gray→dark
+                Math.floor(55 + 50 * s * (1 - s * 0.5)), // G: gray→teal
+                Math.floor(65 + 170 * s),      // B: gray→blue
+            ];
+        }
+    }
+
+    for (let i = 0; i < w; i++) {
+        // Sample with interpolation between neighbors for smoothness
+        const fIdx = i / w * (sorted.length - 1);
+        const lo = Math.floor(fIdx);
+        const hi = Math.min(lo + 1, sorted.length - 1);
+        const frac = fIdx - lo;
+        const v = ((1 - frac) * sorted[lo] + frac * sorted[hi]) / maxAbs;
+
+        const [cr, cg, cb] = lerpColor(v);
+
+        const grad = ctx.createLinearGradient(i, 0, i, h);
+        grad.addColorStop(0, `rgba(${cr},${cg},${cb},0.4)`);
+        grad.addColorStop(0.5, `rgb(${cr},${cg},${cb})`);
+        grad.addColorStop(1, `rgba(${cr},${cg},${cb},0.4)`);
+        ctx.fillStyle = grad;
+        ctx.fillRect(i, 0, 1, h);
+    }
+}
+
+// Auto-generate analysis from brain activation data
+const regionRanges = {
+    PFC: [0, 3618], Insula: [3618, 4549], Temporal: [4549, 5219],
+    Parietal: [5219, 7286], Occipital: [7286, 10170]
+};
+const regionDescriptions = {
+    PFC: { name: 'Prefrontal Cortex', pos: 'decision-making / self-relevance', neg: 'low cognitive engagement' },
+    Insula: { name: 'Insula', pos: 'emotional arousal / interoception', neg: 'reduced price pain' },
+    Temporal: { name: 'Temporal Lobe', pos: 'emotion / memory encoding', neg: 'low emotional processing' },
+    Parietal: { name: 'Parietal Lobe', pos: 'attention allocation', neg: 'low spatial attention' },
+    Occipital: { name: 'Occipital Lobe', pos: 'visual processing', neg: 'low visual engagement' },
+};
+
+function generateAnalysis(label) {
+    const act = brainData.activations[label];
+    if (!act) return { r: '—', m: '—' };
+
+    // Calculate mean activation per region
+    const regionAct = {};
+    const n_left = 10242;
+    for (const [region, desc] of Object.entries(regionDescriptions)) {
+        // Simple approximation: split voxels proportionally
+        const total = act.length;
+        let sum = 0, count = 0;
+        const start = Math.floor(total * Object.keys(regionDescriptions).indexOf(region) / 5);
+        const end = Math.floor(total * (Object.keys(regionDescriptions).indexOf(region) + 1) / 5);
+        for (let i = start; i < end; i++) { sum += act[i]; count++; }
+        regionAct[region] = count > 0 ? sum / count : 0;
+    }
+
+    // Sort by absolute activation
+    const sorted = Object.entries(regionAct).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+
+    // Top 2-3 activated regions
+    const topRegions = sorted.slice(0, 3).filter(([_, v]) => Math.abs(v) > 0.001);
+    const regions = topRegions.map(([r, v]) => {
+        const desc = regionDescriptions[r];
+        return `${desc.name} ${v > 0 ? '↑' : '↓'}`;
+    }).join(' + ');
+
+    const mechanisms = topRegions.map(([r, v]) => {
+        const desc = regionDescriptions[r];
+        return v > 0 ? desc.pos : desc.neg;
+    }).join('; ');
+
+    return { r: regions || '—', m: mechanisms || 'Minimal activation detected' };
+}
+
+window.filterByLang = filterByLang;
+
+window.navigate = function(dir) {
+    let next = currentIdx + dir;
+    if (next < 0) next = sortedItems.length - 1;
+    if (next >= sortedItems.length) next = 0;
+    showItem(next);
+};
+
+function animate() { requestAnimationFrame(animate); controls.update(); composer.render(); }
+
+init();
+</script>
+</body>
+</html>

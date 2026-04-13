@@ -1,0 +1,23 @@
+{
+  "formula": "0.40\u00d7PFC + (-0.20)\u00d7Insula + 0.20\u00d7Temporal + 0.10\u00d7Parietal + 0.10\u00d7Occipital",
+  "references": [
+    "Knutson et al. 2007, Neuron - Neural Predictors of Purchases",
+    "Falk et al. 2012, Psychological Science - Neural Focus Group",
+    "Venkatraman et al. 2015, Journal of Marketing Research",
+    "Berns & Moore 2012, Journal of Consumer Psychology"
+  ],
+  "weights": {
+    "PFC": 0.4,
+    "Insula": -0.2,
+    "Temporal": 0.2,
+    "Parietal": 0.1,
+    "Occipital": 0.1
+  },
+  "region_voxel_counts": {
+    "Occipital": 2884,
+    "PFC": 3618,
+    "Insula": 931,
+    "Parietal": 2067,
+    "Temporal": 670
+  }
+}
